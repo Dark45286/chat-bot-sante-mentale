@@ -3,23 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
 import os
-from dotenv import load_dotenv
 
 # ====================
 # CONFIG
 # ====================
-load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-if not GROQ_API_KEY:
-    raise RuntimeError("❌ GROQ_API_KEY manquant dans le .env")
 
 GROQ_MODEL = "llama-3.1-8b-instant"
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-
-HEADERS = {
-    "Authorization": f"Bearer {GROQ_API_KEY}",
-    "Content-Type": "application/json"
-}
 
 # ====================
 # FASTAPI
@@ -44,10 +35,21 @@ class ChatRequest(BaseModel):
 # ====================
 @app.get("/")
 def root():
-    return {"status": "Backend Groq/Mistral OK"}
+    return {"status": "Backend Groq OK"}
 
 @app.post("/chat")
 def chat(data: ChatRequest):
+
+    if not GROQ_API_KEY:
+        return {
+            "reply": "⚠️ Clé API manquante côté serveur."
+        }
+
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
     payload = {
         "model": GROQ_MODEL,
         "messages": [
@@ -59,7 +61,7 @@ def chat(data: ChatRequest):
     }
 
     try:
-        r = requests.post(GROQ_URL, headers=HEADERS, json=payload, timeout=20)
+        r = requests.post(GROQ_URL, headers=headers, json=payload, timeout=20)
         r.raise_for_status()
         result = r.json()
         reply = result["choices"][0]["message"]["content"]
