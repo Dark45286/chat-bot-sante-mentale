@@ -1,18 +1,14 @@
 {
-  "version": 2,
   "builds": [
     {
-      "src": "backend/main.py",
-      "use": "@vercel/python",
-      "config": { "maxLambdaSize": "50mb" }
-    },
-    {
-      "src": "frontend/**/*",
-      "use": "@vercel/static"
+      "src": "main.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "backend/main.py" },
-    { "src": "/(.*)", "dest": "frontend/index.html" }
+    {
+      "src": "/api/(.*)",
+      "dest": "main.py"
+    }
   ]
 }
